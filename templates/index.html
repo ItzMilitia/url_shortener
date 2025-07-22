@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python URL Shortener</title>
+</head>
+<body>
+    <h1>Python URL Shortener</h1>
+    <form id="shorten-form">
+        <label for="long-url-input">Enter a long URL to shorten:</label>
+        <br>
+        <input
+            type="url"
+            id="long-url-input"
+            name="long_url"
+            placeholder="https://example.com/a-very-long-url"
+            required
+        >
+        <br><br>
+        <label for="custom-alias-input">Enter a custom alias (optional):</label>
+        <br>
+        <input
+            type="text"
+            id="custom-alias-input"
+            name="custom_alias"
+            placeholder="e.g., my-awesome-event"
+        >
+        <br><br>
+        <button type="submit">Shorten</button>
+    </form>
+    <div id="result-container"></div>
+    <script>
+        const shortenForm = document.getElementById('shorten-form');
+        const resultContainer = document.getElementById('result-container');
+        shortenForm.addEventListener('submit', async(event) => {
+            event.preventDefault();
+            console.log('Form submission prevented!');
+            const urlInput = document.getElementById('long-url-input');
+            const longUrl = urlInput.value;
+            const aliasInput = document.getElementById('custom-alias-input');
+            const customAlias = aliasInput.value;
+            resultContainer.innerHTML = '';
+            try {
+                const response = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ long_url: longUrl, custom_alias: customAlias }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    resultContainer.innerHTML = `
+                        <p>Success! Your short URL is:</p>
+                        <a href="${data.short_url}" target="_blank">${data.short_url}</a>
+                    `;
+                } else {
+                    resultContainer.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            }catch (error) {
+                resultContainer.innerHTML = `<p style="color: red;">An unexpected error occurred. Please try again.</p>`;
+                console.error('Fetch error:', error);
+            }
+            const response = await fetch('/api/shorten', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({long_url: longUrl}),
+            });
+            console.log('Received response from server:', response);
+        });
+    </script>
+</body>
+</html>
